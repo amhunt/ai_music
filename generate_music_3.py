@@ -1,6 +1,6 @@
 from music21 import *
 import sys
-from generator_util import *
+from generator_util_3 import *
 
 
 def process_notes( notes ):
