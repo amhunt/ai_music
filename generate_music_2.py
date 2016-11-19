@@ -1,7 +1,7 @@
 from music21 import *
 import sys
 import random
-from generator_util import *
+from generator_util_2 import *
 
 def process_score( score ):
 	if len(score.parts.stream()) == 0:
