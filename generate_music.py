@@ -1,12 +1,15 @@
 from music21 import *
 import sys
 from generator_util import *
+from statistics import mean
+from statistics import pstdev
 
 
 def process_notes( notes ):
+
+	curr_phrase_count = 0
 	i = 0
 	for noteObj in notes:
-
 		if (i > len(notes)-k_order): 
 		# handle last notes (wrap-around case)
 			curr_k_notes = get_range_of_notes(notes, i, i+k_order-len(notes))
@@ -17,6 +20,15 @@ def process_notes( notes ):
 			next_note = get_note_or_rest( notes[i+k_order-len(notes)] )
 		else:
 			next_note = get_note_or_rest( notes[i+k_order] )
+
+		if noteObj.isRest:
+			if curr_phrase_count != 0:
+				lengths_of_phrases.append(curr_phrase_count)
+				# print("phrase length: " + str(curr_phrase_count))
+				curr_phrase_count = 0
+		else:
+			curr_phrase_count = curr_phrase_count+noteObj.duration.quarterLength
+
 
 		curr_k_notes = str(curr_k_notes)
 		if (curr_k_notes in markov_map):
@@ -45,6 +57,7 @@ palestrina_paths = corpus.getComposer('palestrina')
 
 # add to model
 markov_map = {}
+lengths_of_phrases = []
 i = 0
 halfway = False
 print("analyzing " + str(num_scores) + " scores")
@@ -65,8 +78,11 @@ for score in palestrina_paths[0:num_scores]:
 	if (i > num_scores/2) and not halfway:
 		print("halfway done!")
 		halfway = True
-	print(i)
+	print("analyzing score #"+str(i))
 	i += 1
+
+print("mean phrase length of input: " + str(mean(lengths_of_phrases)))
+print("std dev of length of input: " + str(pstdev(lengths_of_phrases)))
 
 # produce new music
 first_score_notes = process_score(corpus.parse(palestrina_paths[0]))
@@ -77,6 +93,9 @@ for first_note in first_score_first_notes:
 
 empty_score = stream.Part()
 
-generatedScore = generate(midi_seed, output_length, markov_map, empty_score)
+(generatedScore, generated_phrase_lengths) = generate(midi_seed, output_length, markov_map, empty_score)
+
+print("mean phrase length of generated: " + str(mean(generated_phrase_lengths)))
+print("std dev of length of generated: " + str(pstdev(generated_phrase_lengths)))
 generatedScore.show()
 

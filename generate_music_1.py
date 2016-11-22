@@ -22,10 +22,11 @@ def process_score( score ):
 		return
 	sopPart = score.parts.stream()[0]
 	notes = sopPart.flat.notes
+	
 	i = 0
-
 	for noteObj in notes:
 		i+=1
+
 	i=0
 	for noteObj in notes:
 		# last notes
