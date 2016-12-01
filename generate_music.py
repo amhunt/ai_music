@@ -11,8 +11,9 @@ import pickle
 
 print("Music Generation Begins")
 output_length = int(sys.argv[1])
+input_file_str = sys.argv[2]
 
-stored_data = pickle.load( open("saved_music.p", "rb") )
+stored_data = pickle.load( open(input_file_str, "rb") )
 composer_paths = stored_data["composer_paths"]
 k_order = stored_data["k_order"]
 markov_map = stored_data["markov_map"]
@@ -31,5 +32,5 @@ empty_score = music21.stream.Part()
 
 print("mean phrase length of generated: " + str(mean(generated_phrase_lengths)))
 print("std dev of length of generated: " + str(pstdev(generated_phrase_lengths)))
-generatedScore.show()
+# generatedScore.show()
 

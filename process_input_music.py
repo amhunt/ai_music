@@ -98,5 +98,5 @@ to_store = {
 	"phrase_bundle": phrase_bundle,
 }
 
-pickle.dump(to_store, open("saved_music.p", "wb"))
+pickle.dump(to_store, open("saved_music_" + str(k_order) + ".p", "wb"))
 

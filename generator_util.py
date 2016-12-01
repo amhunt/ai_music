@@ -58,6 +58,45 @@ def process_score( score ):
 	notes = notes[i:]
 	return notes
 
+def get_note_length( note_len_str ):
+	if "/" in note_len_str:
+		fraction = note_len_str.split('/')
+		note_length = float(fraction[0]) / float(fraction[1])
+	else:
+		note_length = float(note_len_str)
+
+	return note_length
+
+def create_score_from_generated( generated, curr_score, orig_phrases ):
+	i = 0
+	generated_lengths_of_phrases = []
+	curr_phrase_length = 0
+	curr_phrase_count = 0
+	num_phrases_duplicated = 0
+	for generatedNote in generated:
+		generatedNoteDetails = generatedNote.split(':')
+		if generatedNoteDetails[0] == "rest":
+			n = note.Rest(generatedNoteDetails[1])
+			n.duration.quarterLength = get_note_length(generatedNoteDetails[2])
+			if curr_phrase_length != 0:
+				generated_lengths_of_phrases.append(curr_phrase_length)
+				complete_phrase = get_notes_in_range(generated, i - curr_phrase_count, i)
+				if complete_phrase in orig_phrases:
+					num_phrases_duplicated = num_phrases_duplicated + 1
+
+				curr_phrase_length = 0
+				curr_phrase_count = 0
+		else:
+			n = note.Note(generatedNoteDetails[1])
+			curr_note_length = get_note_length(generatedNoteDetails[2])
+			n.duration.quarterLength = curr_note_length
+			curr_phrase_length = curr_phrase_length + curr_note_length
+			curr_phrase_count = curr_phrase_count + 1
+		curr_score.append(n)
+		i = i + 1
+	return (curr_score, num_phrases_duplicated, generated_lengths_of_phrases)
+
+
 def generate(first_k_notes, output_length, markov_map, curr_score, orig_phrases):
 	print("generating music")
 	i = 0
@@ -65,7 +104,6 @@ def generate(first_k_notes, output_length, markov_map, curr_score, orig_phrases)
 	curr_notes = get_notes_in_range(first_k_notes,0,len(first_k_notes))
 	curr_phrase_length = 0
 	while (i < output_length):
-		# print(i)
 		if (str(curr_notes) not in markov_map):
 			print("ERROR: " + str(curr_notes))
 			break
@@ -81,7 +119,8 @@ def generate(first_k_notes, output_length, markov_map, curr_score, orig_phrases)
 
 		# if curr phrase is long, go to rest if there is one
 		is_found = False
-		if curr_phrase_length > 15:
+		# 40 is a good phrase length early cutoff for palestrina phrases
+		if curr_phrase_length > 40:
 			for key, value in probs.items():
 					if key.split(':')[0] == "rest":
 						next_note = key
@@ -101,46 +140,16 @@ def generate(first_k_notes, output_length, markov_map, curr_score, orig_phrases)
 		if next_note_parts[0] == "rest":
 			curr_phrase_length = 0
 		else:
-			curr_phrase_length = curr_phrase_length + float(next_note_parts[2])
+			curr_phrase_length = curr_phrase_length + get_note_length( next_note_parts[2] )
 
 		curr_notes = curr_notes[1:]
 		curr_notes.append(next_note)
 		i = i+1
 
-	generated_lengths_of_phrases = []
-	curr_phrase_length = 0
-	curr_phrase_count = 0
-	
 	# convert to score
-	i = 0
-	num_phrases_duplicated = 0
-	for generatedNote in generated:
-		generatedNoteDetails = generatedNote.split(':')
-		if generatedNoteDetails[0] == "rest":
-			n = note.Rest(generatedNoteDetails[1])
-			n.duration.quarterLength = float(generatedNoteDetails[2])
-			if curr_phrase_length != 0:
-				generated_lengths_of_phrases.append(curr_phrase_length)
-				complete_phrase = get_notes_in_range(generated, i - curr_phrase_count, i)
-				print(complete_phrase)
-				if complete_phrase in orig_phrases:
-					print("duplicate phrase found")
-					num_phrases_duplicated = num_phrases_duplicated + 1
-
-				curr_phrase_length = 0
-				curr_phrase_count = 0
-		else:
-			n = note.Note(generatedNoteDetails[1])
-			if "/" in generatedNoteDetails[2]:
-				fraction = generatedNoteDetails[2].split('/')
-				curr_note_length = float(fraction[0]) / float(fraction[1])
-			else:
-				curr_note_length = float(generatedNoteDetails[2])
-			n.duration.quarterLength = curr_note_length
-			curr_phrase_length = curr_phrase_length + curr_note_length
-			curr_phrase_count = curr_phrase_count + 1
-		curr_score.append(n)
-		i = i + 1
+	(curr_score, num_phrases_duplicated, generated_lengths_of_phrases) = create_score_from_generated(generated, curr_score, orig_phrases)
 	print("num phrases created: " + str(len(generated_lengths_of_phrases)))
 	print("num duplicate phrases created: " + str(num_phrases_duplicated))
+	print("percentage of generated phrases that are original: " + str((len(generated_lengths_of_phrases)-num_phrases_duplicated)/len(generated_lengths_of_phrases)))
+
 	return (curr_score, generated_lengths_of_phrases)
