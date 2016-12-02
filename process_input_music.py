@@ -11,7 +11,7 @@ def process_notes( notes ):
 	i = 0
 	curr_phrase_length = 0
 	curr_phrase_count = 0
-	for noteObj in notes:
+	for note_obj in notes:
 		if (i > len(notes)-k_order): 
 		# handle last notes (wrap-around case)
 			curr_k_notes = get_range_of_notes(notes, i, i+k_order-len(notes))
@@ -23,7 +23,7 @@ def process_notes( notes ):
 		else:
 			next_note = get_note_or_rest( notes[i+k_order] )
 
-		if noteObj.isRest:
+		if note_obj.isRest:
 			if curr_phrase_length != 0:
 				lengths_of_phrases.append(curr_phrase_length)
 				# print("phrase length: " + str(curr_phrase_length))
@@ -32,7 +32,7 @@ def process_notes( notes ):
 				curr_phrase_length = 0
 				curr_phrase_count = 0
 		else:
-			curr_phrase_length = curr_phrase_length + noteObj.duration.quarterLength
+			curr_phrase_length = curr_phrase_length + note_obj.duration.quarterLength
 			curr_phrase_count = curr_phrase_count + 1
 
 		curr_k_notes = str(curr_k_notes)
