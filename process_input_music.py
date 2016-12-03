@@ -25,7 +25,7 @@ def process_notes( notes ):
 
 		if note_obj.isRest:
 			if curr_phrase_length != 0:
-				lengths_of_phrases.append(curr_phrase_length)
+				phrase_lengths.append(curr_phrase_length)
 				# print("phrase length: " + str(curr_phrase_length))
 				complete_phrase = get_range_of_notes(notes, i - curr_phrase_count, i)
 				phrase_bundle.append(complete_phrase)
@@ -62,7 +62,7 @@ composer_paths = corpus.getComposer('palestrina')
 # add to model
 phrase_bundle = []
 markov_map = {}
-lengths_of_phrases = []
+phrase_lengths = []
 i = 0
 halfway = False
 print("analyzing " + str(num_scores) + " scores")
@@ -86,8 +86,8 @@ for score in composer_paths[0:num_scores]:
 	print("analyzing score #"+str(i))
 	i += 1
 
-print("mean phrase length of input: " + str(mean(lengths_of_phrases)))
-print("std dev of length of input: " + str(pstdev(lengths_of_phrases)))
+print("mean phrase length of input: " + str(mean(phrase_lengths)))
+print("std dev of length of input: " + str(pstdev(phrase_lengths)))
 print("num phrases found: " + str(len(phrase_bundle)))
 
 to_store = { 
@@ -96,6 +96,7 @@ to_store = {
 	"composer_paths": composer_paths,
 	"markov_map": markov_map,
 	"phrase_bundle": phrase_bundle,
+	"phrase_lengths": phrase_lengths,
 }
 
 pickle.dump(to_store, open("saved_music_" + str(k_order) + ".p", "wb"))

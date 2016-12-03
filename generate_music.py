@@ -18,6 +18,7 @@ composer_paths = stored_data["composer_paths"]
 k = stored_data["k_order"]
 markov_map = stored_data["markov_map"]
 phrase_bundle = stored_data["phrase_bundle"]
+phrase_lengths = stored_data["phrase_lengths"]
 
 # produce new music
 empty_score = music21.stream.Part()
