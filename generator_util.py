@@ -15,30 +15,39 @@ def get_notes_in_range( notes, start, end ):
 	
 def get_note_or_rest( note ):
 	if note.isRest:
-		# could try duration.quarterLength as well
 		return "rest:"+note.duration.type+':'+str(note.duration.quarterLength)
 	elif note.isNote:
 		return "note:"+note.nameWithOctave+':'+str(note.duration.quarterLength)
 	else:
 		return "error"
 
-def get_range_of_notes( notes, start, end ):
+def get_range_of_note_objects( notes, start, end ):
 	new_note_list = []
 	if end > start: 
 		for in_range_note in notes[start:end]:
-			new_note_or_rest = get_note_or_rest(in_range_note)
+			new_note_or_rest = in_range_note
 			if new_note_or_rest != "error":
 				new_note_list.append(new_note_or_rest)
 	else:
 		for in_range_note in notes[start:]:
-			new_note_or_rest = get_note_or_rest(in_range_note)
+			new_note_or_rest = in_range_note
 			if new_note_or_rest != "error":
 				new_note_list.append(new_note_or_rest)
 		for in_range_note in notes[:end]:
-			new_note_or_rest = get_note_or_rest(in_range_note)
+			new_note_or_rest = in_range_note
 			if new_note_or_rest != "error":
 				new_note_list.append(new_note_or_rest)
+
 	return new_note_list
+
+def convert_to_strings( notes ):
+	new_note_list = []
+	for note_obj in notes:
+		new_note_list.append(get_note_or_rest(note_obj))
+	return new_note_list
+
+def get_range_of_notes( notes, start, end ):
+	return convert_to_strings(get_range_of_note_objects(notes, start, end))
 
 def process_score( score ):
 	if len(score.parts.stream()) == 0:
@@ -159,11 +168,7 @@ def generate(num_output_phrases, k, markov_map, curr_score, orig_phrases):
 		generated_phrases.append(generated)
 		curr_num_phrases = curr_num_phrases + 1
 
-
 	# convert to score
 	(curr_score, num_phrases_duplicated, generated_lengths_of_phrases) = create_score_from_generated(generated_phrases, curr_score, orig_phrases)
-	# print("num phrases created: " + str(len(generated_lengths_of_phrases)))
-	# print("num duplicate phrases created: " + str(num_phrases_duplicated))
-	# print("percentage of generated phrases that are original: " + str((len(generated_lengths_of_phrases)-num_phrases_duplicated)/len(generated_lengths_of_phrases)))
 
 	return (curr_score, generated_lengths_of_phrases)

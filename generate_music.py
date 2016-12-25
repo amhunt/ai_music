@@ -26,5 +26,13 @@ empty_score = music21.stream.Part()
 
 print("mean phrase length of generated: " + str(mean(generated_phrase_lengths)))
 print("std dev of length of generated: " + str(pstdev(generated_phrase_lengths)))
+
+to_store = {
+	"k_order": k,
+	"generated_score": generated_score,
+}
+
+pickle.dump(to_store, open("generated_music_" + str(k) + ".p", "wb"))
+
 # generated_score.show()
 

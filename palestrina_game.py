@@ -3,8 +3,17 @@ import music21
 from generator_util import *
 import sys
 import pickle
+from time import sleep
 
+sleep(1)
 print("Welcome to the Palestrina game!")
+sleep(1)
+print("this will test how well you can tell the difference " \
+	"between actual palestrina phrases and AI generated original ones")
+sleep(1)
+print("just type \"q\" at any time to end the game")
+sleep(1)
+print("enjoy!")
 input_file_str = sys.argv[1]
 
 stored_data = pickle.load( open(input_file_str, "rb") )
@@ -17,6 +26,8 @@ phrase_lengths = stored_data["phrase_lengths"]
 options = ["palestrina", "generated"]
 
 # produce new music
+num_correct = 0
+num_answered = 0
 while True:
 	score_type = random.choice(options)
 	empty_score = music21.stream.Part()
@@ -31,10 +42,20 @@ while True:
 	if ans == "y":
 		if score_type == "palestrina":
 			print("correct!\n")
+			num_correct += 1
 		else:
 			print("incorrect\n")
-	else:
+	elif ans == "n":
 		if score_type == "generated":
 			print("correct!\n")
+			num_correct += 1
 		else:
 			print("incorrect\n")
+	elif ans == "q":
+		print("you answered " + str(num_correct) + " correctly out of " \
+			+ str(num_answered) + " total questions")
+		break
+	else:
+		print("not a valid response - answer marked incorrect")
+	num_answered += 1
+

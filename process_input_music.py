@@ -4,10 +4,11 @@ from generator_util import *
 from statistics import mean
 from statistics import pstdev
 import pickle
+import music21
 
 def process_notes( notes ):
 
-	# first pass for markov
+	# pass for markov
 	i = 0
 	curr_phrase_length = 0
 	curr_phrase_count = 0
@@ -25,13 +26,22 @@ def process_notes( notes ):
 
 		if note_obj.isRest:
 			if curr_phrase_length != 0:
+
+				# deal with phrase
+				complete_phrase = get_range_of_note_objects(notes, i - curr_phrase_count, i)
+				first_note = complete_phrase[0]
+				last_note = complete_phrase[len(complete_phrase)-1]
+				interval = music21.interval.notesToInterval(first_note, last_note)
+				intervals.append(interval)
+
 				phrase_lengths.append(curr_phrase_length)
-				# print("phrase length: " + str(curr_phrase_length))
-				complete_phrase = get_range_of_notes(notes, i - curr_phrase_count, i)
-				phrase_bundle.append(complete_phrase)
+				complete_phrase_str_list = convert_to_strings(complete_phrase)
+				phrase_bundle.append(complete_phrase_str_list)
 				curr_phrase_length = 0
 				curr_phrase_count = 0
 		else:
+			if curr_phrase_count == 0:
+				first_note = note_obj
 			curr_phrase_length = curr_phrase_length + note_obj.duration.quarterLength
 			curr_phrase_count = curr_phrase_count + 1
 
@@ -63,6 +73,7 @@ composer_paths = corpus.getComposer('palestrina')
 phrase_bundle = []
 markov_map = {}
 phrase_lengths = []
+intervals = []
 i = 0
 halfway = False
 print("analyzing " + str(num_scores) + " scores")
@@ -90,13 +101,14 @@ print("mean phrase length of input: " + str(mean(phrase_lengths)))
 print("std dev of length of input: " + str(pstdev(phrase_lengths)))
 print("num phrases found: " + str(len(phrase_bundle)))
 
-to_store = { 
+to_store = {
 	"k_order": k_order,
 	"num_scores": num_scores,
 	"composer_paths": composer_paths,
 	"markov_map": markov_map,
 	"phrase_bundle": phrase_bundle,
 	"phrase_lengths": phrase_lengths,
+	"intervals": intervals,
 }
 
 pickle.dump(to_store, open("saved_music_" + str(k_order) + ".p", "wb"))
