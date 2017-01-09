@@ -24,21 +24,19 @@ def get_note_or_rest( note ):
 def get_range_of_note_objects( notes, start, end ):
 	new_note_list = []
 	if end > start: 
-		for in_range_note in notes[start:end]:
-			new_note_or_rest = in_range_note
-			if new_note_or_rest != "error":
-				new_note_list.append(new_note_or_rest)
+		new_note_list = get_list_of_note_objects( notes[start:end] )
 	else:
-		for in_range_note in notes[start:]:
-			new_note_or_rest = in_range_note
-			if new_note_or_rest != "error":
-				new_note_list.append(new_note_or_rest)
-		for in_range_note in notes[:end]:
-			new_note_or_rest = in_range_note
-			if new_note_or_rest != "error":
-				new_note_list.append(new_note_or_rest)
-
+		new_note_list = get_list_of_note_objects( notes[start:].extend(notes[:end]) )
 	return new_note_list
+
+def get_list_of_note_objects( notes ):
+	return notes
+	# new_note_list = []
+	# for in_range_note in notes:
+	# 	new_note_or_rest = in_range_note
+	# 	if new_note_or_rest != "error":
+	# 		new_note_list.append(new_note_or_rest)
+	# return new_note_list
 
 def convert_to_strings( notes ):
 	new_note_list = []
@@ -96,17 +94,24 @@ def create_score_from_generated( generated_phrases, curr_score, orig_phrases ):
 	for phrase in generated_phrases:
 		complete_phrase = get_notes_in_range(phrase, 0, len(phrase))
 		curr_phrase_length = 0
+
 		if complete_phrase in orig_phrases:
 			num_phrases_duplicated = num_phrases_duplicated + 1
-		
-		(curr_score, curr_phrase_length) = append_phrase_to_score(complete_phrase, curr_score)
+		else:
+			# Un-tab this to save all phrases (not just novel ones!)
+			(curr_score, curr_phrase_length) = append_phrase_to_score(complete_phrase, curr_score)
 
-		new_rest = note.Rest()
-		new_rest.duration.quarterLength = 4 - (curr_phrase_length%4)
-		curr_score.append(new_rest)
+			# append rest at end of each phrase
+			new_rest = note.Rest()
+			new_rest.duration.quarterLength = 4 - (curr_phrase_length%4)
+			curr_score.append(new_rest)
 
-		generated_lengths_of_phrases.append(curr_phrase_length)
+			generated_lengths_of_phrases.append(curr_phrase_length)
 
+
+	print(str(len(generated_phrases)) + ' phrases produced')
+	print(str(len(generated_lengths_of_phrases)) + ' ORIGINAL phrases produced')
+	print(str(num_phrases_duplicated) + ' duplicate phrases found and removed')
 	return (curr_score, num_phrases_duplicated, generated_lengths_of_phrases)
 
 

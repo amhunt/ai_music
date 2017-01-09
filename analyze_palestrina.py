@@ -10,7 +10,7 @@ from analyzor_util import *
 #               Start of Main                 #
 ###############################################
 
-print("Music Generation Begins")
+print("Analysis of Palestrina Corpus Beginning...")
 input_file_str = sys.argv[1]
 
 stored_data = pickle.load( open(input_file_str, "rb") )
@@ -21,14 +21,37 @@ phrase_bundle = stored_data["phrase_bundle"]
 intervals = stored_data["intervals"]
 
 interval_map = {}
-
 for interval in intervals:
 	semitones = interval.semitones
-	if semitones in interval_map:
-		interval_map[semitones] += 1
-	else:
-		interval_map[semitones] = 1
+	interval_map[semitones] = interval_map.get(semitones, 0) + 1
+
+ending_notes = {}
+for phrase_str in phrase_bundle:
+	ending_note = phrase_str[len(phrase_str)-1].split(":")[1]
+	ending_notes[ending_note] = ending_notes.get(ending_note, 0) + 1
+
+interval_from_C4_map = {}
+c4_note_obj = note.Note('C4')
+for pitch, count in ending_notes.items():
+	interval = music21.interval.notesToInterval(c4_note_obj, note.Note(pitch)).semitones
+	interval_from_C4_map[interval] = count
+
+# converge to one octave
+octave_map = {}
+for interval, count in interval_from_C4_map.items():
+	scale_degree = interval % 12
+	octave_map[scale_degree] = octave_map.get(scale_degree, 0) + count
+
+# normalize
+for scale_degree, frequency in octave_map.items():
+	octave_map[scale_degree] = frequency/len(intervals)*100
+
+print(ending_notes)
+plot_map(octave_map, 'Palestrina Phrase Ending Scale Degrees', '% Frequency', 'Scale Degree')
+
+# normalize
+for interval, frequency in interval_map.items():
+	interval_map[interval] = frequency/len(intervals)*100
 
 # Process data to be plotted
-print(interval_map)
-plot_interval_map(interval_map)
+plot_map(interval_map, 'Palestrina Phrase Ending Tones', '% Frequency', 'Interval in Semitones')
