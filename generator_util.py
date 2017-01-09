@@ -31,6 +31,8 @@ def get_range_of_note_objects( notes, start, end ):
 
 def get_list_of_note_objects( notes ):
 	return notes
+
+	# THIS WAS PREVENTING ERRORS EARLIER ON BUT IS NOT LIKELY UNNECESSARY (AND SLOW)
 	# new_note_list = []
 	# for in_range_note in notes:
 	# 	new_note_or_rest = in_range_note

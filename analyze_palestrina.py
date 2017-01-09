@@ -55,3 +55,18 @@ for interval, frequency in interval_map.items():
 
 # Process data to be plotted
 plot_map(interval_map, 'Palestrina Phrase Ending Tones', '% Frequency', 'Interval in Semitones')
+
+# PITCH RANGES
+phrase_object_bundle = get_phrase_objs_from_str(phrase_bundle)
+pal_phrase_ranges = get_pitch_ranges_of_phrase_list(phrase_object_bundle)
+
+phrase_range_map = {}
+for phrase_range in pal_phrase_ranges:
+	phrase_range_map[phrase_range] = phrase_range_map.get(phrase_range, 0) + 1
+
+# normalize
+for phrase_range, frequency in phrase_range_map.items():
+	phrase_range_map[phrase_range] = frequency/len(intervals)*100
+
+plot_map(phrase_range_map, 'Palestrina Phrase Pitch Ranges', '% Frequency', 'Range in Semitones')
+

@@ -98,8 +98,21 @@ def get_pitch_ranges_of_phrase_list( phrase_list ):
 	ranges = []
 	for phrase in phrase_list:
 		ranges.append(get_pitch_range_of_phrase(phrase))
-
 	return ranges
 
+def get_list_of_note_objs_from_str( note_str_list ):
+	phrase = []
+	for note_str in note_str_list:
+		new_note_obj = music21.note.Note(note_str.split(':')[1])
+		phrase.append(new_note_obj)
+
+	return phrase
+
+def get_phrase_objs_from_str( phrase_str_list ):
+	phrase_bundle = []
+	for phrase in phrase_str_list:
+		phrase_bundle.append(get_list_of_note_objs_from_str(phrase))
+
+	return phrase_bundle
 
 

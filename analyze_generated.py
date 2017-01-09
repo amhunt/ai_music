@@ -34,17 +34,9 @@ for detailed_interval in intervals:
 	basic_interval = music21.interval.notesToInterval(first_note, last_note)
 	semitones = basic_interval.semitones
 	interval_map[semitones] = interval_map.get(semitones, 0) + 1
-	# if semitones in interval_map:
-	# 	interval_map[semitones] += 1
-	# else:
-	# 	interval_map[semitones] = 1
 
 	last_note_str = last_note.nameWithOctave
 	last_note_map[last_note_str] = last_note_map.get(last_note_str, 0) + 1
-	# if last_note_str in last_note_map:
-	# 	last_note_map[last_note_str] += 1
-	# else:
-	# 	last_note_map[last_note_str] = 1
 
 # normalize
 for interval, frequency in interval_map.items():
